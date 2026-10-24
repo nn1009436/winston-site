@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winston Client | Maxed Out</title>
+    <style>
+        /* Добавляем плавный скролл для всего документа */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #080b12;
+            color: #e2e8f0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        /* Фон с картинкой и градиентом */
+        .background {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(8, 11, 18, 0.7) 0%, rgba(8, 11, 18, 0.95) 100%),
+                        url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop') no-repeat center center;
+            background-size: cover;
+            z-index: -1;
+            filter: brightness(0.6);
+            animation: slowZoom 30s infinite alternate;
+        }
+
+        @keyframes slowZoom {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+
+        /* Навигация (плавающая) */
+        nav {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(20, 25, 35, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 100px;
+            padding: 10px 30px;
+            display: flex; gap: 30px; align-items: center;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: background 0.3s;
+        }
+        nav:hover { background: rgba(20, 25, 35, 0.8); }
+        nav a {
+            color: #a0aec0; text-decoration: none; font-size: 0.95em; font-weight: 500;
+            transition: color 0.3s, transform 0.2s;
+        }
+        nav a:hover, nav a.active { color: #fff; transform: translateY(-1px); }
+        nav .logo-text { color: #fff; font-weight: bold; font-size: 1.2em; margin-right: 20px; display: flex; align-items: center; gap: 8px;}
+        nav .btn-nav { background: #2d3748; color: #fff; padding: 8px 20px; border-radius: 20px; transition: background 0.3s; }
+        nav .btn-nav:hover { background: #4a5568; }
+
+        /* Главный экран (Hero) */
+        .hero {
+            height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            padding-top: 80px;
+        }
+        .hero-sub {
+            color: #a0aec0; font-size: 1.1em; margin-bottom: 20px; letter-spacing: 1px;
+            animation: fadeUp 1s ease-out 0.2s both;
+        }
+        .hero h1 {
+            font-size: 5em; font-weight: 800; line-height: 1.1; color: #fff;
+            margin-bottom: 25px;
+            animation: fadeUp 1s ease-out 0.4s both;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .hero p {
+            font-size: 1.2em; color: #cbd5e0; max-width: 600px; margin-bottom: 40px;
+            animation: fadeUp 1s ease-out 0.6s both;
+        }
+        .hero-buttons {
+            display: flex; gap: 15px;
+            animation: fadeUp 1s ease-out 0.8s both;
+        }
+        .btn-white {
+            background: #fff; color: #080b12; padding: 15px 30px; border-radius: 30px;
+            text-decoration: none; font-weight: 600; font-size: 1.1em;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none; cursor: pointer;
+        }
+        .btn-white:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
+        .btn-outline {
+            background: transparent; color: #fff; padding: 15px 30px; border-radius: 30px;
+            text-decoration: none; font-weight: 600; font-size: 1.1em;
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+        /* Секции контента */
+        .section { padding: 100px 0; position: relative; }
+        .section-title { font-size: 3em; font-weight: 700; color: #fff; margin-bottom: 20px; line-height: 1.1; }
+        .section-subtitle { color: #a0aec0; font-size: 1.1em; margin-bottom: 50px; max-width: 500px; }
+
+        /* Плавное появление секций при скролле */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* Блок "Features" */
+        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .module-card {
+            background: rgba(20, 25, 35, 0.8); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 25px; backdrop-filter: blur(10px);
+            animation: fadeUp 1s ease-out both;
+        }
+        .module-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .module-item:last-child { border-bottom: none; }
+        .module-info h4 { color: #fff; font-size: 1.1em; margin-bottom: 4px; }
+        .module-info p { color: #a0aec0; font-size: 0.85em; }
+        .toggle { width: 44px; height: 24px; background: #2d3748; border-radius: 20px; position: relative; cursor: pointer; transition: background 0.3s; }
+        .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform 0.3s; }
+        .toggle.on { background: #4a5568; }
+        .toggle.on::after { transform: translateX(20px); }
+
+        /* Тарифы */
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .price-card {
+            background: #f8fafc; border-radius: 20px; padding: 30px; color: #1a202c;
+            transition: transform 0.3s, box-shadow 0.3s; animation: fadeUp 0.8s ease-out both; position: relative;
+        }
+        .price-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .price-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; }
+        .price-card h3 { font-size: 1.5em; font-weight: 700; margin-bottom: 5px; }
+        .price-card .price { font-size: 2.5em; font-weight: 800; margin-bottom: 20px; }
+        .price-card .price span { font-size: 0.4em; color: #718096; }
+        .price-card ul { list-style: none; margin-bottom: 30px; }
+        .price-card ul li { color: #4a5568; margin-bottom: 10px; font-size: 0.95em; display: flex; align-items: center; gap: 8px; }
+        .price-card .btn-buy {
+            display: block; width: 100%; padding: 15px; background: #1a202c; color: #fff;
+            text-align: center; text-decoration: none; border-radius: 12px; font-weight: bold; transition: background 0.2s;
+        }
+        .price-card .btn-buy:hover { background: #2d3748; }
+
+        /* Подвал */
+        footer { text-align: center; padding: 40px 0; color: #4a5568; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.9em; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+
+    <nav>
+        <div class="logo-text">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            Winston
+        </div>
+        <a href="#hero" class="active">Home</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        {% if user %}
+            <a href="/dashboard" class="btn-nav">Кабинет</a>
+        {% else %}
+            <a href="/login" style="margin-left: 15px;">Log In</a>
+            <a href="/register" class="btn-nav">Sign Up</a>
+        {% endif %}
+    </nav>
+
+    <div class="container">
+        <!-- HERO -->
+        <section class="hero" id="hero">
+            <div class="hero-sub">Yet another perfect minecraft client...</div>
+            <h1>Minecraft Client.<br>But maxed out.</h1>
+            <p>Winston Client is a Minecraft cheat that our developers have poured their hearts and souls into. Maximum performance, absolute safety.</p>
+            <div class="hero-buttons">
+                <a href="/register" class="btn-white">Sign up for free</a>
+                <a href="#pricing" class="btn-outline">See pricing</a>
+            </div>
+        </section>
+
+        <!-- FEATURES (С анимацией при прокрутке) -->
+        <section class="section fade-in-section" id="features">
+            <div class="features-grid">
+                <div>
+                    <h2 class="section-title">So many features.<br>Yet so easy to use.</h2>
+                    <p class="section-subtitle">Winston client offers features for every possible gameplay scenario, while maintaining the purest simplicity and comfort of use.</p>
+                    <a href="#pricing" class="btn-white" style="margin-top: 20px; display: inline-block;">See pricing</a>
+                </div>
+                <div class="module-card">
+                    <div class="module-item">
+                        <div class="module-info">
+                            <h4>Kill Aura</h4>
+                            <p>Automatically attacks enemies within range</p>
+                        </div>
+                        <div class="toggle on"></div>
+                    </div>
+                    <div class="module-item">
+                        <div class="module-info">
+                            <h4>Speed</h4>
+                            <p>Increases your base running speed</p>
+                        </div>
+                        <div class="toggle"></div>
+                    </div>
+                    <div class="module-item">
+                        <div class="module-info">
+                            <h4>ESP</h4>
+                            <p>Shows info about objects through textures</p>
+                        </div>
+                        <div class="toggle on"></div>
+                    </div>
+                    <div class="module-item">
+                        <div class="module-info">
+                            <h4>Scaffold</h4>
+                            <p>Automatically places blocks under you</p>
+                        </div>
+                        <div class="toggle"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRICING (С анимацией) -->
+        <section class="section fade-in-section" id="pricing">
+            <h2 class="section-title" style="text-align: center; margin-bottom: 10px;">Great prices for great quality.</h2>
+            <p class="section-subtitle" style="text-align: center; margin: 0 auto 50px;">Choose the plan that fits your needs. All plans include access to all features and 24/7 support.</p>
+            
+            <div class="pricing-grid">
+                <!-- 1 -->
+                <div class="price-card">
+                    <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=600&auto=format&fit=crop" alt="30 Days">
+                    <div style="color: #718096; font-size: 0.9em; margin-bottom: 5px;">A great way to start.</div>
+                    <h3>30 Days</h3>
+                    <div class="price">200<span> грн</span></div>
+                    <ul>
+                        <li>✓ Support available 24/7</li>
+                        <li>✓ Lightweight and easy to use</li>
+                        <li>✓ More than 25 modules</li>
+                        <li>✓ Beautiful interface</li>
+                    </ul>
+                    <a href="/dashboard" class="btn-buy">Get 30 days subscription</a>
+                </div>
+                <!-- 2 -->
+                <div class="price-card">
+                    <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop" alt="360 Days">
+                    <div style="color: #e53e3e; font-size: 0.9em; margin-bottom: 5px; font-weight: bold;">save 47%</div>
+                    <h3>360 Days</h3>
+                    <div class="price">700<span> грн</span></div>
+                    <ul>
+                        <li>✓ Support available 24/7</li>
+                        <li>✓ Lightweight and easy to use</li>
+                        <li>✓ More than 25 modules</li>
+                        <li>✓ Beautiful interface</li>
+                    </ul>
+                    <a href="/dashboard" class="btn-buy">Get 360 days subscription</a>
+                </div>
+                <!-- 3 -->
+                <div class="price-card">
+                    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600&auto=format&fit=crop" alt="Lifetime">
+                    <div style="color: #e53e3e; font-size: 0.9em; margin-bottom: 5px; font-weight: bold;">save 93%</div>
+                    <h3>Lifetime</h3>
+                    <div class="price">1000<span> грн</span></div>
+                    <ul>
+                        <li>✓ Support available 24/7</li>
+                        <li>✓ Lightweight and easy to use</li>
+                        <li>✓ More than 25 modules</li>
+                        <li>✓ Beautiful interface</li>
+                    </ul>
+                    <a href="/dashboard" class="btn-buy">Get Lifetime subscription</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        &copy; 2026 Winston Client. All rights reserved.
+    </footer>
+
+    <script>
+        // Скрипт для анимации появления секций при скролле
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.fade-in-section');
+            
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, {
+                threshold: 0.15 // Секция должна быть видна хотя бы на 15%
+            });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>

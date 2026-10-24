@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - Winston Client</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: #080b12; color: #e2e8f0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh; overflow-x: hidden;
+            background-image: linear-gradient(to bottom, rgba(8, 11, 18, 0.9), rgba(8, 11, 18, 0.95)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2070');
+            background-size: cover; background-position: fixed;
+        }
+        .container { max-width: 800px; margin: auto; padding: 40px 20px; }
+        
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 40px;
+        }
+        .logo { font-size: 1.5em; font-weight: bold; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-right { display: flex; align-items: center; gap: 15px; }
+        .user-badge {
+            background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 20px;
+            display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 500;
+        }
+        .user-badge .icon { font-size: 1.3em; }
+        .logout-btn { color: #a0aec0; text-decoration: none; font-size: 0.9em; }
+        .logout-btn:hover { color: #ff3232; }
+
+        .card {
+            background: rgba(20, 25, 35, 0.7); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+            padding: 30px; margin-bottom: 20px; animation: fadeUp 0.8s ease-out both;
+        }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { color: #fff; margin-bottom: 20px; font-size: 1.5em; }
+        label { display: block; color: #a0aec0; font-size: 0.9em; margin-bottom: 8px; }
+        input[type="text"] {
+            width: 100%; padding: 14px; margin-bottom: 20px;
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; color: #fff; font-size: 1em; outline: none;
+        }
+        input[type="text"]:focus { border-color: #a0aec0; }
+        
+        .icon-grid { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .icon-option { position: relative; cursor: pointer; }
+        .icon-option input { position: absolute; opacity: 0; }
+        .icon-option .icon-box {
+            font-size: 2em; padding: 15px; background: rgba(0,0,0,0.2);
+            border: 2px solid transparent; border-radius: 12px;
+            transition: 0.2s; display: flex; justify-content: center; align-items: center;
+        }
+        .icon-option input:checked + .icon-box {
+            border-color: #fff; background: rgba(255,255,255,0.1); transform: scale(1.1);
+        }
+        
+        .btn {
+            padding: 14px 30px; background: #fff; color: #080b12;
+            border: none; border-radius: 10px; font-weight: 700; font-size: 1em;
+            cursor: pointer; transition: transform 0.2s; width: 100%;
+        }
+        .btn:hover { transform: translateY(-2px); }
+
+        .btn-download {
+            display: block; width: 100%; text-align: center; text-decoration: none;
+            background: #2d3748; color: #fff; padding: 15px; border-radius: 10px;
+            font-weight: bold; margin-top: 20px; transition: background 0.3s;
+        }
+        .btn-download:hover { background: #4a5568; }
+
+        .payment-box { display: none; margin-top: 20px; }
+        .payment-box.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .pay-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .pay-tab {
+            flex: 1; padding: 10px; text-align: center; background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+            cursor: pointer; transition: 0.2s; font-size: 0.9em;
+        }
+        .pay-tab.active { background: rgba(255,255,255,0.1); border-color: #fff; color: #fff; }
+        
+        .pay-details { background: #000; padding: 20px; border-radius: 12px; color: #fff; font-size: 1.1em; text-align: center; line-height: 1.6; }
+        .pay-details span { font-weight: bold; color: #a0aec0; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="logo">Winston</a>
+            <div class="nav-right">
+                <div class="user-badge">
+                    <span class="icon">{{ user.avatar_icon }}</span>
+                    <span>{{ user.nickname if user.nickname else 'User' }}</span>
+                </div>
+                <a href="/logout" class="logout-btn">Log Out</a>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div style="background:rgba(50,255,100,0.1); color:#32ff64; padding:15px; border-radius:10px; margin-bottom:20px; text-align:center;">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <!-- Профиль -->
+        <div class="card">
+            <h2>Your Profile</h2>
+            <form method="POST">
+                <label>Display Name</label>
+                <input type="text" name="nickname" value="{{ user.nickname }}" placeholder="Enter your name">
+                
+                <label>Choose an Avatar</label>
+                <div class="icon-grid">
+                    <label class="icon-option">
+                        <input type="radio" name="avatar_icon" value="🍕" {% if user.avatar_icon == '🍕' or not user.avatar_icon %}checked{% endif %}>
+                        <div class="icon-box">🍕</div>
+                    </label>
+                    <label class="icon-option">
+                        <input type="radio" name="avatar_icon" value="🍔" {% if user.avatar_icon == '🍔' %}checked{% endif %}>
+                        <div class="icon-box">🍔</div>
+                    </label>
+                    <label class="icon-option">
+                        <input type="radio" name="avatar_icon" value="🌭" {% if user.avatar_icon == '🌭' %}checked{% endif %}>
+                        <div class="icon-box">🌭</div>
+                    </label>
+                    <label class="icon-option">
+                        <input type="radio" name="avatar_icon" value="🍟" {% if user.avatar_icon == '🍟' %}checked{% endif %}>
+                        <div class="icon-box">🍟</div>
+                    </label>
+                    <label class="icon-option">
+                        <input type="radio" name="avatar_icon" value="🥤" {% if user.avatar_icon == '🥤' %}checked{% endif %}>
+                        <div class="icon-box">🥤</div>
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn">Save Profile</button>
+            </form>
+        </div>
+
+        <!-- Подписка -->
+        <div class="card">
+            <h2>Subscription & Download</h2>
+            {% if user.has_access %}
+                <p style="color:#32ff64; margin-bottom: 10px;">✅ You have an active subscription!</p>
+                <a href="#" class="btn-download">⬇️ Download Winston Launcher</a>
+                <p style="color:#a0aec0; font-size:0.8em; margin-top:10px; text-align:center;">* Link will be available soon</p>
+            {% else %}
+                <p style="color:#e53e3e; margin-bottom: 20px;">❌ No active subscription.</p>
+                
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+                    <button class="btn" style="flex:1; min-width:100px; padding:10px; font-size:0.9em;" onclick="showPayment()">30 Days - 200 грн</button>
+                    <button class="btn" style="flex:1; min-width:100px; padding:10px; font-size:0.9em;" onclick="showPayment()">360 Days - 700 грн</button>
+                    <button class="btn" style="flex:1; min-width:100px; padding:10px; font-size:0.9em;" onclick="showPayment()">Lifetime - 1000 грн</button>
+                </div>
+
+                <div id="payment-area" class="payment-box">
+                    <div class="pay-tabs">
+                        <div class="pay-tab active" onclick="switchPay('card', this)">💳 UA Card</div>
+                        <div class="pay-tab" onclick="switchPay('crypto', this)">💎 Crypto</div>
+                    </div>
+
+                    <div id="pay-card" class="pay-details">
+                        Transfer to card:<br>
+                        <span>4441 1144 3151 1102</span><br>
+                        <small style="color:#a0aec0; font-size:0.7em;">(Mono / Privat / UkrGaz)</small>
+                    </div>
+
+                    <div id="pay-crypto" class="pay-details" style="display:none;">
+                        <p style="margin-bottom:10px;">USDT (TON):<br><span style="font-size:0.8em;">UQDrIWrKI6l_PoJeXL6diDhYrK_Znz97RzSKT7URUSY9F4wT</span></p>
+                        <p>USDT (TRC20):<br><span style="font-size:0.8em;">TMUHJhJwCyAzvHhXnLWyXcNhMXwNJA2BeY</span></p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function showPayment() {
+            document.getElementById('payment-area').classList.add('active');
+        }
+        function switchPay(type, el) {
+            document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('pay-card').style.display = type === 'card' ? 'block' : 'none';
+            document.getElementById('pay-crypto').style.display = type === 'crypto' ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

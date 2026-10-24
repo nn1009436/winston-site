@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - Winston Client</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: #080b12;
+            color: #e2e8f0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            background-image: linear-gradient(to bottom, rgba(8, 11, 18, 0.8), rgba(8, 11, 18, 0.95)), url('https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=2070');
+            background-size: cover; background-position: center;
+        }
+        .card {
+            background: rgba(20, 25, 35, 0.7); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+            padding: 40px; width: 100%; max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: fadeUp 0.8s ease-out;
+        }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        h2 { color: #fff; text-align: center; margin-bottom: 30px; font-size: 1.8em; }
+        label { display: block; color: #a0aec0; font-size: 0.9em; margin-bottom: 8px; }
+        input {
+            width: 100%; padding: 14px; margin-bottom: 20px;
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; color: #fff; font-size: 1em; outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus { border-color: #a0aec0; }
+        button {
+            width: 100%; padding: 15px; background: #fff; color: #080b12;
+            border: none; border-radius: 10px; font-weight: 700; font-size: 1.1em;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
+        .links { text-align: center; margin-top: 20px; }
+        .links a { color: #a0aec0; text-decoration: none; font-size: 0.9em; transition: color 0.3s; display: block; margin-bottom: 10px; }
+        .links a:hover { color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Create Account</h2>
+        <form method="POST">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="name@example.com" required>
+            <label>Password</label>
+            <input type="password" name="password" placeholder="••••••••" required>
+            <button type="submit">Sign Up</button>
+        </form>
+        <div class="links">
+            <a href="/login">Already have an account? Log In</a>
+            <a href="/">← Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>
