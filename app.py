@@ -16,6 +16,8 @@ def get_db():
 
 def init_db():
     with get_db() as conn:
+        # Полностью пересоздаем таблицу, чтобы избежать ошибок со старыми колонками
+        conn.execute('DROP TABLE IF EXISTS users')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
