@@ -12,7 +12,6 @@ app.secret_key = "winston_client_secret_key_2024"
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def get_db():
-    # Подключаемся к PostgreSQL
     conn = psycopg2.connect(DATABASE_URL)
     return conn
 
@@ -30,6 +29,12 @@ def init_db():
                 )
             ''')
         conn.commit()
+
+# Создаём таблицу при старте (сработает и в gunicorn на Render)
+try:
+    init_db()
+except Exception as e:
+    print(f"Ошибка создания базы: {e}")
 
 PLANS = [
     {"name": "30 Days", "price": 200, "period": "30 дней"},
@@ -129,6 +134,5 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    init_db()
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
